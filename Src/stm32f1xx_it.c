@@ -377,7 +377,7 @@ void USART1_IRQHandler(void)
 * @param  None
 * @retval None
 */
-void CANx_RX_IRQHandler(void)
+void USB_LP_CAN1_RX0_IRQHandler(void)
 {
   HAL_CAN_IRQHandler(&hcan);
 }

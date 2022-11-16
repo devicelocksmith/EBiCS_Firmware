@@ -530,7 +530,7 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef *hcan)
 
   /*##-3- Configure the NVIC #################################################*/
   /* NVIC configuration for CAN1 Reception complete interrupt */
-  HAL_NVIC_SetPriority(CANx_RX_IRQn, 1, 0);
+  HAL_NVIC_SetPriority(CANx_RX_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(CANx_RX_IRQn);
 }
 
