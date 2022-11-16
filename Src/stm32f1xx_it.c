@@ -50,7 +50,9 @@ extern TIM_HandleTypeDef htim3;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern UART_HandleTypeDef huart1;
-
+#ifdef CAN
+extern CAN_HandleTypeDef hcan;
+#endif
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
 /******************************************************************************/
@@ -368,6 +370,18 @@ void USART1_IRQHandler(void)
 
   /* USER CODE END USART1_IRQn 1 */
 }
+
+#ifdef CAN
+/**
+* @brief  This function handles CAN1 RX0 interrupt request.
+* @param  None
+* @retval None
+*/
+void CANx_RX_IRQHandler(void)
+{
+  HAL_CAN_IRQHandler(&hcan);
+}
+#endif
 
 /* USER CODE BEGIN 1 */
 

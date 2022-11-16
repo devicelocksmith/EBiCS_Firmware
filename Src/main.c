@@ -81,6 +81,10 @@ ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 DMA_HandleTypeDef hdma_adc1;
 
+#ifdef CAN
+CAN_HandleTypeDef hcan;
+#endif
+
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
@@ -264,6 +268,9 @@ static void MX_ADC1_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
+#ifdef CAN
+static void MX_CAN_Init(void);
+#endif
 int16_t T_NTC(uint16_t ADC);
 void set_NTC_beta(void);
 
@@ -412,7 +419,9 @@ int main(void)
   MX_TIM1_Init(); //Hier die Reihenfolge getauscht!
   MX_TIM2_Init();
   MX_TIM3_Init();
-
+#ifdef CAN
+  MX_CAN_Init();
+#endif
  // Start Timer 1
     if(HAL_TIM_Base_Start_IT(&htim1) != HAL_OK)
       {
@@ -527,6 +536,18 @@ int main(void)
 #if (AUTODETECT == 1)
    	if(adcData[0]>VOLTAGE_MIN) autodetect();
    	else printf_("Battery voltage too low!:  %d,\n ",adcData[0]);
+#endif
+
+#ifdef CAN
+   	hcan.pTxMsg->Data[0] = 0xDE;
+   	hcan.pTxMsg->Data[1] = 0xAD;
+   	hcan.pTxMsg->Data[2] = 0xBE;
+   	hcan.pTxMsg->Data[3] = 0xEF;
+    hcan.pTxMsg->DLC = 4;
+    if (HAL_CAN_Transmit_IT(&hcan) != HAL_OK)
+    {
+    	Error_Handler();
+    }
 #endif
 
 #endif
@@ -1292,6 +1313,64 @@ static void MX_ADC2_Init(void)
   }
 
 }
+
+#ifdef CAN
+/* CAN init function */
+static void MX_CAN_Init(void)
+{
+
+  CAN_FilterConfTypeDef  sFilterConfig;
+  static CanTxMsgTypeDef        TxMessage;
+  static CanRxMsgTypeDef        RxMessage;
+
+  hcan.Instance = CANx;
+  hcan.pTxMsg = &TxMessage;
+  hcan.pRxMsg = &RxMessage;
+
+
+  hcan.Init.Prescaler = 4; // 500kbit/s 87.5% Sample Point
+  hcan.Init.Mode = CAN_MODE_NORMAL;
+  hcan.Init.SJW = CAN_SJW_1TQ; // SJW 1
+  hcan.Init.BS1 = CAN_BS1_13TQ;
+  hcan.Init.BS2 = CAN_BS2_2TQ;
+  hcan.Init.TTCM = DISABLE;
+  hcan.Init.ABOM = DISABLE;
+  hcan.Init.AWUM = DISABLE;
+  hcan.Init.NART = DISABLE;
+  hcan.Init.RFLM = DISABLE;
+  hcan.Init.TXFP = DISABLE;
+
+  if (HAL_CAN_Init(&hcan) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  /*##-2- Configure the CAN Filter ###########################################*/
+  sFilterConfig.FilterNumber = 0;
+  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+  sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+  sFilterConfig.FilterIdHigh = 0x0000;
+  sFilterConfig.FilterIdLow = 0x0000;
+  sFilterConfig.FilterMaskIdHigh = 0x0000;
+  sFilterConfig.FilterMaskIdLow = 0x0000;
+  sFilterConfig.FilterFIFOAssignment = 0;
+  sFilterConfig.FilterActivation = ENABLE;
+  sFilterConfig.BankNumber = 14;
+
+  if (HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK)
+  {
+    /* Filter configuration Error */
+    Error_Handler();
+  }
+
+  /*##-3- Configure Transmission process #####################################*/
+  hcan.pTxMsg->StdId = CANx_TX_ID;
+  hcan.pTxMsg->ExtId = 0x01;
+  hcan.pTxMsg->RTR = CAN_RTR_DATA;
+  hcan.pTxMsg->IDE = CAN_ID_STD;
+}
+#endif
+
 /* TIM1 init function */
 static void MX_TIM1_Init(void)
 {
@@ -2435,6 +2514,23 @@ void set_NTC_beta()
     // (((64/(ln(2)*298.15) << 16) * (NTC_BETA << 16)) - ((64/ln(2)*ln(10000)) << 16 - 0.5 << 16) >> 32
     NTC_beta.denum = ((uint64_t)((uint64_t)20295 * ((uint64_t)NTC_BETA << 16)) -
                             (uint64_t)3650351083316) >> 32;
+}
+#endif
+
+#ifdef CAN
+void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef *CanHandle)
+{
+  if ((CanHandle->pRxMsg->StdId == CANx_RX_ID) && (CanHandle->pRxMsg->IDE == CAN_ID_STD) && (CanHandle->pRxMsg->DLC == 2))
+  {
+    //DoSomethingWithReceivedData(CanHandle->pRxMsg->Data[0]);
+  }
+
+  /* Receive */
+  if (HAL_CAN_Receive_IT(CanHandle, CAN_FIFO0) != HAL_OK)
+  {
+    /* Reception Error */
+    Error_Handler();
+  }
 }
 #endif
 

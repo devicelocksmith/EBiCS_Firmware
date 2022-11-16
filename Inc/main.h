@@ -94,6 +94,32 @@
 #define NTC_BETA 3900
 #define SP_TEMP_MULTIPLEX 0 // high-pass ADC value on NTC-Hall multiplexed wire
 
+//#define CAN
+#ifdef CAN
+#define CANx                           CAN1
+#define CANx_CLK_ENABLE()              __HAL_RCC_CAN1_CLK_ENABLE()
+#define CANx_GPIO_CLK_ENABLE()         __HAL_RCC_GPIOB_CLK_ENABLE()
+
+#define CANx_FORCE_RESET()             __HAL_RCC_CAN1_FORCE_RESET()
+#define CANx_RELEASE_RESET()           __HAL_RCC_CAN1_RELEASE_RESET()
+
+/* Definition for CANx Pins */
+#define CANx_TX_PIN                    GPIO_PIN_12
+#define CANx_TX_GPIO_PORT              GPIOA
+#define CANx_RX_PIN                    GPIO_PIN_11
+#define CANx_RX_GPIO_PORT              GPIOA
+
+/* Definition for CANx AFIO Remap */
+#define CANx_AFIO_REMAP_CLK_ENABLE()   __HAL_RCC_AFIO_CLK_ENABLE()
+#define CANx_AFIO_REMAP_RX_TX_PIN()    __HAL_AFIO_REMAP_CAN1_2()
+
+/* Definition for CAN's NVIC */
+#define CANx_RX_IRQn                   USB_LP_CAN1_RX0_IRQn
+#define CANx_RX_IRQHandler             USB_LP_CAN1_RX0_IRQHandler
+#define CANx_TX_ID                     0x123
+#define CANx_RX_ID                     0x321
+#endif
+
 /* ########################## Assert Selection ############################## */
 /**
   * @brief Uncomment the line below to expanse the "assert_param" macro in the 
