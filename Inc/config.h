@@ -43,22 +43,22 @@
 #define THROTTLE_OFFSET 900
 #define THROTTLE_MAX 2800
 #define WHEEL_CIRCUMFERENCE 2200
-#define GEAR_RATIO 11 //dummy for testing
-#define SPEEDLIMIT 25
+#define GEAR_RATIO 50 //dummy for testing
+#define SPEEDLIMIT 70
 #define PULSES_PER_REVOLUTION 1
 #define PH_CURRENT_MAX 600
-#define BATTERYCURRENT_MAX 10000
+#define BATTERYCURRENT_MAX 25000 // Set-top psu
 #define SPEC_ANGLE -167026406L //Value no longer needed
 //#define DIRDET
 #define FRAC_HIGH 30
 #define FRAC_LOW 15
-//#define TS_MODE
+#define TS_MODE
 //#define TQONAD1
 #define DISPLAY_TYPE DISPLAY_TYPE_DEBUG
 #define REVERSE 1
 #define PUSHASSIST_CURRENT 30
 #define VOLTAGE_MIN 300
-#define REGEN_CURRENT 200
+#define REGEN_CURRENT 0
 //#define FAST_LOOP_LOG
 //#define DISABLE_DYNAMIC_ADC
 //#define INDIVIDUAL_MODES
@@ -67,14 +67,14 @@
 #define REGEN_CURRENT_MAX 10000
 
 
-#define P_FACTOR_PLL 10
-#define I_FACTOR_PLL 10
+#define P_FACTOR_PLL 5
+#define I_FACTOR_PLL 11
 #define AUTODETECT 1
-#define SPEED_PLL 0 //1 for using PLL, 0 for angle extrapolation
+#define SPEED_PLL 1 //1 for using PLL, 0 for angle extrapolation
 
 #define EXTERNAL 1
 #define INTERNAL 0
-#define SPEEDSOURCE INTERNAL
+#define SPEEDSOURCE EXTERNAL
 #define SPEEDFILTER 1
 #define SIXSTEPTHRESHOLD 20000
 

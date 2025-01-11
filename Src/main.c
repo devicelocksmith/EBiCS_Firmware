@@ -544,22 +544,35 @@ int main(void)
    	hcan.pTxMsg->Data[2] = 0xBE;
    	hcan.pTxMsg->Data[3] = 0xEF;
     hcan.pTxMsg->DLC = 4;
-    if (HAL_CAN_Transmit_IT(&hcan) != HAL_OK)
+    while(1){
+    	switch (HAL_CAN_Transmit(&hcan, 10) )
     {
-    	Error_Handler();
-    }
+    	case 0:
+    		printf_("OK\n");
+    		break;
+    	case 1:
+    	    printf_("ERROR\n");
+    	    break;
+    	case 2:
+    		printf_("BUSY\n");
+    		break;
+    	case 3:
+    		printf_("TIMEOUT\n");
+    		break;
+
+    }}
 #endif
 
 #endif
 
 #ifdef NCTE
-   	while(adcData[1]<THROTTLE_OFFSET)
+//   	while(adcData[1]<THROTTLE_OFFSET)
 #else
-   	while(adcData[1]>THROTTLE_OFFSET)
+//   	while(adcData[1]>THROTTLE_OFFSET)
 #endif
-   	  	{
-   	  	//do nothing (For Safety at switching on)
-   	  	}
+//   	  	{
+//   	  	//do nothing (For Safety at switching on)
+//   	  	}
 
 #if (DISPLAY_TYPE != DISPLAY_TYPE_DEBUG || !AUTODETECT)
    	EE_ReadVariable(EEPROM_POS_HALL_ORDER, &i16_hall_order);
@@ -997,7 +1010,7 @@ int main(void)
 
 		  if(ui8_KV_detect_flag){ui16_KV_detect_counter++;}
 #if (R_TEMP_PULLUP)
-          ui16_adc_temp = adcData[6]; // adcData[5] on LSW12G
+          ui16_adc_temp = adcData[5]; // adcData[5] on LSW12G
 #if (SP_TEMP_MULTIPLEX)               // ADC needs to be above this value to register temperature
           if (ui16_adc_temp > SP_TEMP_MULTIPLEX) // 150 is a good starting point with 220R pull-up
 #endif
@@ -1328,13 +1341,13 @@ static void MX_CAN_Init(void)
   hcan.pRxMsg = &RxMessage;
 
 
-  hcan.Init.Prescaler = 4; // 500kbit/s 87.5% Sample Point
+  hcan.Init.Prescaler = 16; // 500kbit/s 87.5% Sample Point
   hcan.Init.Mode = CAN_MODE_NORMAL;
   hcan.Init.SJW = CAN_SJW_1TQ; // SJW 1
   hcan.Init.BS1 = CAN_BS1_13TQ;
   hcan.Init.BS2 = CAN_BS2_2TQ;
   hcan.Init.TTCM = DISABLE;
-  hcan.Init.ABOM = DISABLE;
+  hcan.Init.ABOM = ENABLE;
   hcan.Init.AWUM = DISABLE;
   hcan.Init.NART = DISABLE;
   hcan.Init.RFLM = DISABLE;
@@ -1365,7 +1378,7 @@ static void MX_CAN_Init(void)
 
   /*##-3- Configure Transmission process #####################################*/
   hcan.pTxMsg->StdId = CANx_TX_ID;
-  hcan.pTxMsg->ExtId = 0x01;
+  //hcan.pTxMsg->ExtId = 0x01;
   hcan.pTxMsg->RTR = CAN_RTR_DATA;
   hcan.pTxMsg->IDE = CAN_ID_STD;
 }
@@ -2522,7 +2535,8 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef *CanHandle)
 {
   if ((CanHandle->pRxMsg->StdId == CANx_RX_ID) && (CanHandle->pRxMsg->IDE == CAN_ID_STD) && (CanHandle->pRxMsg->DLC == 2))
   {
-    //DoSomethingWithReceivedData(CanHandle->pRxMsg->Data[0]);
+	  printf("CAN!\n");
+	  //DoSomethingWithReceivedData(CanHandle->pRxMsg->Data[0]);
   }
 
   /* Receive */
